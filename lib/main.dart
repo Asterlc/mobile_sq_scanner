@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+import 'favoriteScreen.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+List<FavoriteUrl> favoriteUrls = [];
 
 class MyApp extends StatelessWidget {
   static const customSwatch = MaterialColor(
@@ -56,6 +59,22 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text("Mobile Scanner"),
         actions: [
+          IconButton(
+            color: Colors.white,
+            icon: const Icon(Icons.favorite),
+            iconSize: 32.0,
+            onPressed: () {
+              favoriteUrls;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FavoritesScreen(
+                    favoriteUrls: favoriteUrls,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             color: Colors.white,
             icon: ValueListenableBuilder(
@@ -133,26 +152,34 @@ class FoundCodeScreen extends StatefulWidget {
 }
 
 class _FoundCodeScreenState extends State<FoundCodeScreen> {
+  bool isFavorite = false;
+
   void openURLInBrowser(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrlString(url)) {
+      await launchUrlString(url);
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  void addToFavorites(String url) {
+    setState(() {
+      favoriteUrls.add(FavoriteUrl(alias: Uri.parse(url).host, url: url));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Found Code"),
+        title: const Text("Found Code"),
         centerTitle: true,
         leading: IconButton(
           onPressed: () {
             widget.screenClosed();
             Navigator.pop(context);
           },
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_outlined,
           ),
         ),
@@ -163,18 +190,18 @@ class _FoundCodeScreenState extends State<FoundCodeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 "Scanned Code:",
                 style: TextStyle(
                   fontSize: 20,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               Text(
                 widget.value,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
@@ -182,7 +209,20 @@ class _FoundCodeScreenState extends State<FoundCodeScreen> {
                 onPressed: () {
                   openURLInBrowser(widget.value);
                 },
-                child: Text('Open URL'),
+                child: const Text('Open URL'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  addToFavorites(widget.value);
+
+                  setState(() {
+                    isFavorite = !isFavorite;
+                  });
+                },
+                child: Text(
+                  isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
+                ),
               ),
             ],
           ),
@@ -191,4 +231,3 @@ class _FoundCodeScreenState extends State<FoundCodeScreen> {
     );
   }
 }
-
