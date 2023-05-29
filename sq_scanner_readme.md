@@ -22,16 +22,17 @@ To run this Flutter project, make sure you have Flutter installed on your machin
 
    ```bash
    git clone <repository-url>
+   ```
 
 2. Navigate to the project directory:
 
 ```bash
 cd mobile_sq_scanner
 ```
-3. Install the dependencies
-
-flutter pub get
-
+3. Install the dependencies:
+4. ```bash
+   flutter pub get
+   ```
 Usage
 
 Connect your Android or iOS device or start an emulator/simulator.
