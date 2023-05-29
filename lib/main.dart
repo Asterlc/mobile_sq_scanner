@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'favoriteScreen.dart';
+import 'favorite_screen.dart';
 
 void main() {
   runApp(const MyApp());
