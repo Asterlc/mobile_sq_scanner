@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:mobile_sq_scanner/db/databasehelper.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'favorite_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final dbHelper = DatabaseHelper();
+  await dbHelper.database;
+
   runApp(const MyApp());
 }
-
-List<FavoriteUrl> favoriteUrls = [];
 
 class MyApp extends StatelessWidget {
   static const customSwatch = MaterialColor(
@@ -52,6 +55,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   MobileScannerController cameraController = MobileScannerController();
   bool _screenOpened = false;
+  late List<FavoriteRecord> favoriteUrls = [];
+  final dbHelper = DatabaseHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchURLs();
+  }
+
+  void fetchURLs() async {
+    favoriteUrls = await dbHelper.getAllFavoriteUrls();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.favorite),
             iconSize: 32.0,
             onPressed: () {
-              favoriteUrls;
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => FavoritesScreen(
-                    favoriteUrls: favoriteUrls,
+                    favoriteUrlsRecords: favoriteUrls.isNotEmpty ? favoriteUrls : [],
                   ),
                 ),
               );
@@ -154,6 +168,18 @@ class FoundCodeScreen extends StatefulWidget {
 class _FoundCodeScreenState extends State<FoundCodeScreen> {
   bool isFavorite = false;
 
+  final dbHelper = DatabaseHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDatabase();
+  }
+
+  void _initializeDatabase() async {
+    await dbHelper.database;
+  }
+
   void openURLInBrowser(String url) async {
     if (await canLaunchUrlString(url)) {
       await launchUrlString(url);
@@ -162,10 +188,11 @@ class _FoundCodeScreenState extends State<FoundCodeScreen> {
     }
   }
 
-  void addToFavorites(String url) {
-    setState(() {
-      favoriteUrls.add(FavoriteUrl(alias: Uri.parse(url).host, url: url));
-    });
+  void addToFavorites(String url) async {
+    await dbHelper
+        .insertFavoriteUrl(FavoriteUrl(alias: Uri.parse(url).host, url: url));
+
+    fetch
   }
 
   @override
@@ -204,6 +231,9 @@ class _FoundCodeScreenState extends State<FoundCodeScreen> {
                 style: const TextStyle(
                   fontSize: 16,
                 ),
+              ),
+              const SizedBox(
+                height: 20,
               ),
               ElevatedButton(
                 onPressed: () {

@@ -3,6 +3,24 @@ import 'package:path/path.dart';
 
 import '../favorite_screen.dart';
 
+class FavoriteRecord {
+  int id;
+  late String _alias;
+  final String url;
+
+  FavoriteRecord({
+    required this.id,
+    required String alias,
+    required this.url,
+  }) : _alias = alias;
+
+  String get alias => _alias;
+
+  set alias(String newAlias) {
+    _alias = newAlias;
+  }
+}
+
 class DatabaseHelper {
   static Database? _database;
   static const String _tableName = 'favorite_urls';
@@ -35,12 +53,13 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<FavoriteUrl>> getAllFavoriteUrls() async {
+  Future<List<FavoriteRecord>> getAllFavoriteUrls() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(_tableName);
 
     return List.generate(maps.length, (index) {
-      return FavoriteUrl(
+      return FavoriteRecord(
+        id: maps[index]['id'],
         alias: maps[index]['alias'],
         url: maps[index]['url'],
       );
@@ -50,13 +69,15 @@ class DatabaseHelper {
   Future<void> insertFavoriteUrl(FavoriteUrl favoriteUrl) async {
     final db = await database;
 
-    await db.insert(
+    int testx = await db.insert(
       _tableName,
       {
         'alias': favoriteUrl.alias,
         'url': favoriteUrl.url,
       },
     );
+
+    var x = testx;
   }
 
   Future<void> updateFavoriteUrlAlias(int id, String newAlias) async {

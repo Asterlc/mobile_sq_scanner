@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_sq_scanner/db/databasehelper.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class FavoriteUrl {
@@ -18,9 +19,9 @@ class FavoriteUrl {
 }
 
 class FavoritesScreen extends StatefulWidget {
-  final List<FavoriteUrl> favoriteUrls;
+  final List<FavoriteRecord> favoriteUrlsRecords;
 
-  const FavoritesScreen({Key? key, required this.favoriteUrls})
+  const FavoritesScreen({Key? key, required this.favoriteUrlsRecords})
       : super(key: key);
 
   @override
@@ -28,9 +29,13 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  void removeFromFavorites(FavoriteUrl favoriteUrl) {
+  final dbHelper = DatabaseHelper();
+
+  void removeFromFavorites(FavoriteRecord record) async {
+    await dbHelper.deleteFavoriteUrl(record.id);
+
     setState(() {
-      widget.favoriteUrls.remove(favoriteUrl);
+      widget.favoriteUrlsRecords.remove(record);
     });
   }
 
@@ -42,11 +47,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
-  void editFavoriteAlias(FavoriteUrl favoriteUrl) {
+  void editFavoriteAlias(FavoriteRecord record) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        String newAlias = favoriteUrl.alias;
+        String newAlias = record.alias;
         return AlertDialog(
           title: const Text('Edit Alias'),
           content: TextField(
@@ -57,11 +62,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
           actions: [
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                final currentContext = context;
+                await dbHelper.updateFavoriteUrlAlias(record.id, newAlias);
+
                 setState(() {
-                  favoriteUrl.alias = newAlias;
+                  record.alias = newAlias;
                 });
-                Navigator.of(context).pop();
+                Navigator.of(currentContext).pop();
               },
               child: const Text('Save'),
             ),
@@ -78,9 +86,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         title: const Text('Favorites'),
       ),
       body: ListView.builder(
-        itemCount: widget.favoriteUrls.length,
+        itemCount: widget.favoriteUrlsRecords.length,
         itemBuilder: (context, index) {
-          final favoriteUrl = widget.favoriteUrls[index];
+          final favoriteUrl = widget.favoriteUrlsRecords[index];
           return ListTile(
             title: Text(favoriteUrl.alias),
             trailing: Row(
