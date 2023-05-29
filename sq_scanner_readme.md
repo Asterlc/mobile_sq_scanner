@@ -30,7 +30,7 @@ To run this Flutter project, make sure you have Flutter installed on your machin
 cd mobile_sq_scanner
 ```
 3. Install the dependencies:
-4. ```bash
+```bash
    flutter pub get
    ```
 Usage
