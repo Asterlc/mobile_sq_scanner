@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-import '../favorite_screen.dart';
+import '../screens/favorite_screen.dart';
 
 class FavoriteRecord {
   int id;

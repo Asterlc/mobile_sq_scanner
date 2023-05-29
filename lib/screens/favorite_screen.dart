@@ -19,9 +19,7 @@ class FavoriteUrl {
 }
 
 class FavoritesScreen extends StatefulWidget {
-  final List<FavoriteRecord> favoriteUrlsRecords;
-
-  const FavoritesScreen({Key? key, required this.favoriteUrlsRecords})
+  const FavoritesScreen({Key? key})
       : super(key: key);
 
   @override
@@ -30,12 +28,25 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   final dbHelper = DatabaseHelper();
+  late List<FavoriteRecord> favoriteUrls = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDatabase();
+    fetchURLs();
+  }
+
+  void fetchURLs() async {
+    favoriteUrls = await dbHelper.getAllFavoriteUrls();
+  }
 
   void removeFromFavorites(FavoriteRecord record) async {
     await dbHelper.deleteFavoriteUrl(record.id);
 
+
     setState(() {
-      widget.favoriteUrlsRecords.remove(record);
+      favoriteUrls.remove(record);
     });
   }
 
@@ -79,6 +90,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
+  void _initializeDatabase() async {
+    await dbHelper.database;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,9 +101,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         title: const Text('Favorites'),
       ),
       body: ListView.builder(
-        itemCount: widget.favoriteUrlsRecords.length,
+        itemCount: favoriteUrls.length,
         itemBuilder: (context, index) {
-          final favoriteUrl = widget.favoriteUrlsRecords[index];
+          final favoriteUrl = favoriteUrls[index];
           return ListTile(
             title: Text(favoriteUrl.alias),
             trailing: Row(

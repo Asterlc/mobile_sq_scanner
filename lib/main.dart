@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mobile_sq_scanner/db/databasehelper.dart';
+import 'package:mobile_sq_scanner/screens/found_code_screen.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'favorite_screen.dart';
+import 'screens/favorite_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,18 +56,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   MobileScannerController cameraController = MobileScannerController();
   bool _screenOpened = false;
-  late List<FavoriteRecord> favoriteUrls = [];
+
+  List<FavoriteRecord> favoriteUrls = [];
   final dbHelper = DatabaseHelper();
-
-  @override
-  void initState() {
-    super.initState();
-    fetchURLs();
-  }
-
-  void fetchURLs() async {
-    favoriteUrls = await dbHelper.getAllFavoriteUrls();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FavoritesScreen(
-                    favoriteUrlsRecords: favoriteUrls.isNotEmpty ? favoriteUrls : [],
-                  ),
+                  builder: (context) => const FavoritesScreen(),
                 ),
               );
             },
@@ -140,124 +130,16 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                FoundCodeScreen(screenClosed: _screenWasClosed, value: code),
+            builder: (context) => FoundCodeScreen(
+              screenClosed: _screenWasClosed,
+              value: code,
+              listUrls: favoriteUrls,
+            ),
           ));
     }
   }
 
   void _screenWasClosed() {
     _screenOpened = false;
-  }
-}
-
-class FoundCodeScreen extends StatefulWidget {
-  final String value;
-  final Function() screenClosed;
-
-  const FoundCodeScreen({
-    Key? key,
-    required this.value,
-    required this.screenClosed,
-  }) : super(key: key);
-
-  @override
-  State<FoundCodeScreen> createState() => _FoundCodeScreenState();
-}
-
-class _FoundCodeScreenState extends State<FoundCodeScreen> {
-  bool isFavorite = false;
-
-  final dbHelper = DatabaseHelper();
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeDatabase();
-  }
-
-  void _initializeDatabase() async {
-    await dbHelper.database;
-  }
-
-  void openURLInBrowser(String url) async {
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  void addToFavorites(String url) async {
-    await dbHelper
-        .insertFavoriteUrl(FavoriteUrl(alias: Uri.parse(url).host, url: url));
-
-    fetch
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Found Code"),
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            widget.screenClosed();
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_outlined,
-          ),
-        ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Scanned Code:",
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Text(
-                widget.value,
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  openURLInBrowser(widget.value);
-                },
-                child: const Text('Open URL'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  addToFavorites(widget.value);
-
-                  setState(() {
-                    isFavorite = !isFavorite;
-                  });
-                },
-                child: Text(
-                  isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
