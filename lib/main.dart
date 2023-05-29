@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mobile_sq_scanner/db/databasehelper.dart';
 import 'package:mobile_sq_scanner/screens/found_code_screen.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import 'screens/favorite_screen.dart';
 
@@ -61,6 +60,16 @@ class _MyHomePageState extends State<MyHomePage> {
   final dbHelper = DatabaseHelper();
 
   @override
+  void initState() {
+    super.initState();
+    _fetchURLs();
+  }
+
+  _fetchURLs() async{
+    favoriteUrls = await dbHelper.getAllFavoriteUrls();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const FavoritesScreen(),
+                  builder: (context) =>  FavoritesScreen(favoriteUrls: favoriteUrls,),
                 ),
               );
             },

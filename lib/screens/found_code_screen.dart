@@ -40,11 +40,15 @@ class _FoundCodeScreenState extends State<FoundCodeScreen> {
   }
 
   void addToFavorites(String url) async {
-    await dbHelper
-        .insertFavoriteUrl(FavoriteUrl(alias: Uri
-        .parse(url)
-        .host, url: url));
+    FavoriteUrl favorite = FavoriteUrl(alias: Uri.parse(url).host, url: url);
+    int id = await dbHelper.insertFavoriteUrl(favorite);
+
+    setState(() {
+      widget.listUrls
+          .add(FavoriteRecord(id: id, alias: Uri.parse(url).host, url: url));
+    });
   }
+
   void _initializeDatabase() async {
     await dbHelper.database;
   }

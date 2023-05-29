@@ -66,10 +66,10 @@ class DatabaseHelper {
     });
   }
 
-  Future<void> insertFavoriteUrl(FavoriteUrl favoriteUrl) async {
+  Future<int> insertFavoriteUrl(FavoriteUrl favoriteUrl) async {
     final db = await database;
 
-    int testx = await db.insert(
+    int id = await db.insert(
       _tableName,
       {
         'alias': favoriteUrl.alias,
@@ -77,7 +77,7 @@ class DatabaseHelper {
       },
     );
 
-    var x = testx;
+    return id;
   }
 
   Future<void> updateFavoriteUrlAlias(int id, String newAlias) async {
