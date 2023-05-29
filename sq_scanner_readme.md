@@ -34,9 +34,9 @@ flutter pub get
 
 Usage
 
-    Connect your Android or iOS device or start an emulator/simulator.
+Connect your Android or iOS device or start an emulator/simulator.
 
-    Run the app using the following command:
+Run the app using the following command:
 
       flutter run
 
